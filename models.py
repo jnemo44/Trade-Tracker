@@ -1,6 +1,8 @@
 import os
-from sqlalchemy import Column, String, Integer
+#import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, DateTime, Numeric, Boolean, String, ForeignKey
+#from datetime import datetime
 import json
 
 '''
@@ -35,18 +37,22 @@ class Open(db.Model):
     adjustment = Column(Boolean, nullable=False)
     trade_type = Column(String(100))
     open_description = Column(String(500))
+    #Relationship is one to many (An open order can have multiple close orders)
+    open_close = db.relationship('Close', backref='open', lazy=True)
 
 class Close(db.Model):
     __tablename__ = 'close_orders'
 
     id = Column(Integer, primary_key=True)
-    open_id = Column(Integer, ForeignKey('Open.id'),nullable=False)
+    open_id = Column(Integer, ForeignKey('open_orders.id'),nullable=False)
     close_date = Column(DateTime, nullable=False)
     buy_sell = Column(String(5), nullable=False)
     number_contracts = Column(Integer, nullable=False)
     close_price = Column(Numeric(precision=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
     close_description = Column(String(500))
+
+
     
     
 
