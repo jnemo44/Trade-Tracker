@@ -45,6 +45,19 @@ class Open(db.Model):
     #Relationship is one to many (An open order can have multiple close orders)
     open_close = db.relationship('Close', backref='open', lazy=True)
 
+    def opening_trade(self):
+        return {
+            'id':self.id,
+            'open_date':self.open_date,
+            'buy_sell':self.buy_sell,
+            'ticker':self.ticker,
+            'number_contracts':self.number_contracts,
+            'open_price':str(self.open_price),
+            'adjustment':self.adjustment,
+            'trade_type':self.trade_type,
+            'open_description':self.open_description
+        }
+
 class Close(db.Model):
     __tablename__ = 'close_orders'
 
@@ -56,6 +69,19 @@ class Close(db.Model):
     close_price = Column(Numeric(precision=10,scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
     close_description = Column(String(500))
+
+    def closing_trade(self):
+        return {
+            'id':self.id,
+            'open_id':self.open_id,
+            'close_date':self.close_date,
+            'buy_sell':self.buy_sell,
+            'number_contracts':self.number_contracts,
+            'close_price':str(self.close_price),
+            'adjustment':self.adjustment,
+            'close_description':self.close_description
+        }
+
 
 
     
