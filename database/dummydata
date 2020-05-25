@@ -1,0 +1,31 @@
+INSERT INTO open_orders (open_date,buy_sell,ticker,
+						 number_contracts,open_price,
+						adjustment,trade_type,open_description)
+VALUES ('5/25/2020','sell','EEM',1,2.34,'False','Iron Butterfly','Testing out the strategy');
+
+INSERT INTO open_orders (open_date,buy_sell,ticker,
+						 number_contracts,open_price,
+						adjustment,trade_type,open_description)
+VALUES ('5/25/2020','sell','FXI',1,3.04,'False','Iron Butterfly','Testing out the strategy');
+
+INSERT INTO open_orders (open_date,buy_sell,ticker,
+						 number_contracts,open_price,
+						adjustment,trade_type,open_description)
+VALUES ('5/25/2020','sell','XOP',1,2.56,'False','Iron Butterfly','Testing out the strategy');
+
+
+
+INSERT INTO close_orders (open_id,close_date,buy_sell,
+						 number_contracts,close_price,
+						adjustment,close_description)
+VALUES (1,'5/25/2020','buy',1,0.87,'False','Testing out the strategy');
+
+INSERT INTO close_orders (open_id,close_date,buy_sell,
+						 number_contracts,close_price,
+						adjustment,close_description)
+VALUES (2,'5/25/2020','buy',1,1.01,'False','Testing out the strategy');
+
+INSERT INTO close_orders (open_id,close_date,buy_sell,
+						 number_contracts,close_price,
+						adjustment,close_description)
+VALUES (3,'5/25/2020','buy',1,0.54,'False','Testing out the strategy');
