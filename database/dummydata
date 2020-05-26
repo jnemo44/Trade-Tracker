@@ -13,6 +13,10 @@ INSERT INTO open_orders (open_date,buy_sell,ticker,
 						adjustment,trade_type,open_description)
 VALUES ('5/25/2020','sell','XOP',1,2.56,'False','Iron Butterfly','Testing out the strategy');
 
+INSERT INTO open_orders (open_date,buy_sell,ticker,
+						 number_contracts,open_price,
+						adjustment,trade_type,open_description)
+VALUES ('5/25/2020','sell','XBI',1,1.00,'False','Iron Butterfly','Testing out the strategy');
 
 
 INSERT INTO close_orders (open_id,close_date,buy_sell,
@@ -29,3 +33,8 @@ INSERT INTO close_orders (open_id,close_date,buy_sell,
 						 number_contracts,close_price,
 						adjustment,close_description)
 VALUES (3,'5/25/2020','buy',1,0.54,'False','Testing out the strategy');
+
+INSERT INTO close_orders (open_id,close_date,buy_sell,
+						 number_contracts,close_price,
+						adjustment,close_description)
+VALUES (4,'5/25/2020','buy',1,3.00,'False','Testing out the strategy');
