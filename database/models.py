@@ -58,6 +58,11 @@ class Open(db.Model):
             'open_description':self.open_description
         }
 
+    # Adds new entry to the database
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
 class Close(db.Model):
     __tablename__ = 'close_orders'
 

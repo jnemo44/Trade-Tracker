@@ -19,6 +19,14 @@ CORS(app)
 if __name__ == '__main__':
     APP.run(host='0.0.0.0', port=8080, debug=True)
 '''
+#Use the after_request decorator to set Access-Control-Allow
+@app.after_request
+def after_request(response):
+  response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+  response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  #response.headers.add('Access-Control-Allow-Credentials', 'true')
+  return response
+
 @app.route('/open-orders', methods=['GET'])
 def open_orders():
   available_orders = Open.query.all()
@@ -50,6 +58,13 @@ def order_stats():
   open_orders = Open.query.all()
   close_orders = Close.query.all()
 
+  print(open_orders[0].open_date)
+
+  if len(open_orders) == 0:
+    abort(404)
+  elif len(close_orders) == 0:
+    abort(404)
+
   while num_opened < len(open_orders):
     close_price = db.session.query(Close.close_price, Close.number_contracts).filter(Close.open_id==open_orders[num_opened].id).all()    
     ticker_profit = open_orders[num_opened].open_price
@@ -80,9 +95,40 @@ def order_stats():
 
 @app.route('/open-orders', methods=['POST'])
 def new_open_order():
-  return jsonify ({
-    'success':True
-  })
+  body = request.get_json()
+  new_date = body.get('open_date',None)
+  new_buy_sell = body.get('buy_sell',None)
+  new_ticker = body.get('ticker',None)
+  new_contracts = body.get('number_contracts',None)
+  new_price = body.get('open_price',None)
+  new_adjustment = body.get('adjustment',None)
+  new_type = body.get('trade_type',None)
+  new_description = body.get('open_description',None)
+
+  try:
+    new_trade = Open(
+      open_date=new_date,
+      buy_sell=new_buy_sell,
+      ticker=new_ticker,
+      number_contracts=new_contracts,
+      open_price=new_price,
+      adjustment=new_adjustment,
+      trade_type=new_type,
+      open_description=new_description
+    )
+
+    # Add new model to the database
+    new_trade.insert()
+
+    available_orders = Open.query.all()
+    current_trades = [orders.opening_trade() for orders in available_orders] 
+
+    return jsonify ({
+      'success':True,
+      'current_trades':current_trades
+    })
+  except:
+    abort(422)
 
 @app.route('/close-orders', methods=['POST'])
 def new_close_order():
