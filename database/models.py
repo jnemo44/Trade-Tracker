@@ -43,7 +43,8 @@ class Open(db.Model):
     trade_type = Column(String(100))
     open_description = Column(String(500))
     #Relationship is one to many (An open order can have multiple close orders)
-    open_close = db.relationship('Close', backref='open', lazy=True)
+    #open_close = db.relationship('Close', backref='open', lazy=True, cascade="all,delete")
+    open_close = db.relationship('Close', backref='open', cascade='all,delete', passive_deletes=True, lazy=True,)
 
     def opening_trade(self):
         return {
@@ -63,11 +64,21 @@ class Open(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    # Update exsisting order
+    def update(self):
+        db.session.commit()
+
+    # Delete open order
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class Close(db.Model):
     __tablename__ = 'close_orders'
 
     id = Column(Integer, primary_key=True)
-    open_id = Column(Integer, ForeignKey('open_orders.id'),nullable=False)
+    # Add foreign key ondelete of open_order delete all coresponding closing orders
+    open_id = Column(Integer, ForeignKey('open_orders.id',ondelete='cascade'),nullable=False)
     close_date = Column(DateTime, nullable=False)
     buy_sell = Column(String(5), nullable=False)
     number_contracts = Column(Integer, nullable=False)
@@ -89,6 +100,10 @@ class Close(db.Model):
 
     def insert(self):
         db.session.add(self)
+        db.session.commit()
+
+    # Update exsisting order
+    def update(self):
         db.session.commit()
 
 

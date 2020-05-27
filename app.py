@@ -168,27 +168,80 @@ def new_close_order():
 
 @app.route('/open-orders/<int:order_id>', methods=['PATCH'])
 def edit_open_order(order_id):
-  return jsonify ({
-    'success':True
-  })
+  selected_order = Open.query.filter(Open.id == order_id).one_or_none()
+
+  # Order not found
+  if selected_order is None:
+    abort(404)
+  
+  body = request.get_json()
+  # Currently only allow updating the description
+  new_description = body.get('open_description',None)
+
+  # Bad Request
+  if new_description is None:
+    abort(400)
+
+  try:
+    # Push update to database
+    selected_order.open_description = new_description
+    selected_order.update()
+
+    return jsonify ({
+      'success':True,
+      'updated_order_id':order_id,
+      'new_description':new_description
+    })
+  
+  except:
+    abort(422)
 
 @app.route('/close-orders/<int:order_id>', methods=['PATCH'])
 def edit_close_order(order_id):
-  return jsonify ({
-    'success':True
-  })
+  selected_order = Close.query.filter(Close.id == order_id).one_or_none()
+
+  # Order not found
+  if selected_order is None:
+    abort(404)
+  
+  body = request.get_json()
+  # Currently only allow updating the description
+  new_description = body.get('close_description',None)
+
+  # Bad Request
+  if new_description is None:
+    abort(400)
+
+  try:
+    # Push update to database
+    selected_order.close_description = new_description
+    selected_order.update()
+
+    return jsonify ({
+      'success':True,
+      'updated_order_id':order_id,
+      'new_description':new_description
+    })
+
+  except:
+    abort(422)
 
 @app.route('/open-orders/<int:order_id>', methods=['DELETE'])
 def delete_open_order(order_id):
+  # Deleting an open order will delete all matching closing orders
+  selected_order = Open.query.filter(Open.id == order_id).one_or_none()
+
+  # Nothing to delete
+  if selected_order is None:
+    abort(404)
+
+  selected_order.delete()
+
   return jsonify ({
-    'success':True
+    'success':True,
+    'deleted_id':order_id
   })
 
-@app.route('/close-orders/<int:order_id>', methods=['DELETE'])
-def delete_close_order(order_id):
-  return jsonify ({
-    'success':True
-  })
 
 # Local Dev
 if __name__ == '__main__':
