@@ -60,11 +60,13 @@ def order_stats():
 
   print(open_orders[0].open_date)
 
+  # If no orders exsist abort
   if len(open_orders) == 0:
     abort(404)
   elif len(close_orders) == 0:
     abort(404)
 
+  # Go through every open order and find coresponding close orders
   while num_opened < len(open_orders):
     close_price = db.session.query(Close.close_price, Close.number_contracts).filter(Close.open_id==open_orders[num_opened].id).all()    
     ticker_profit = open_orders[num_opened].open_price
@@ -81,8 +83,8 @@ def order_stats():
     num_opened+=1
 
   # Calculate total profit
-  for v in totals.values():
-    total_profit += float(v)
+  for price in totals.values():
+    total_profit += float(price)
 
   return jsonify ({
     'success':True,
@@ -132,9 +134,37 @@ def new_open_order():
 
 @app.route('/close-orders', methods=['POST'])
 def new_close_order():
-  return jsonify ({
-    'success':True
-  })
+  body = request.get_json()
+  new_oid = body.get('open_id',None)
+  new_date = body.get('close_date',None)
+  new_buy_sell = body.get('buy_sell',None)
+  new_contracts = body.get('number_contracts',None)
+  new_price = body.get('close_price',None)
+  new_adjustment = body.get('adjustment',None)
+  new_description = body.get('close_description',None)
+
+  try:
+    new_trade = Close(
+      open_id = new_oid,
+      close_date = new_date,
+      buy_sell = new_buy_sell,
+      number_contracts = new_contracts,
+      close_price = new_price,
+      adjustment = new_adjustment,
+      close_description = new_description
+    )
+
+    new_trade.insert()
+
+    available_orders = Close.query.all()
+    current_trades = [orders.closing_trade() for orders in available_orders]
+
+    return jsonify ({
+      'success':True,
+      'close_orders':current_trades
+    })
+  except:
+    abort(422)
 
 @app.route('/open-orders/<int:order_id>', methods=['PATCH'])
 def edit_open_order(order_id):

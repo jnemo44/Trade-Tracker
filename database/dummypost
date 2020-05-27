@@ -1,1 +1,22 @@
-{'open_date':5/26/2020,'buy_sell':'sell','ticker':'GPS','number_contracts':3,'open_price':4.75,'adjustment':False,'trade_type':'Iron Condor','open_description':'Keep it wide kid'}
+{"open_date":5/26/2020,"buy_sell":"sell","ticker":"GPS","number_contracts":3,"open_price":4.75,"adjustment":False,"trade_type":"Iron Condor","open_description":"Keep it wide kid"}
+
+{
+	"open_date":"5/26/2020",
+	"buy_sell":"sell",
+	"ticker":"GPS",
+	"number_contracts":3,
+	"open_price":4.75,
+	"adjustment":false,
+	"trade_type":"Iron Condor",
+	"open_description":"Keep it wide kid"
+}
+
+{
+	"open_id":5,
+	"close_date":"5/26/2020",
+	"buy_sell":"buy",
+	"number_contracts":3,
+	"close_price":2.84,
+	"adjustment":false,
+	"close_description":"Keep it wide kid"
+}

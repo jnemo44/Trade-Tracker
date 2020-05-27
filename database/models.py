@@ -87,6 +87,9 @@ class Close(db.Model):
             'close_description':self.close_description
         }
 
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
 
 
     
