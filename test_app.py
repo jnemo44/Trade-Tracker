@@ -48,6 +48,44 @@ class OpenOrdersTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'],True)
 
+    def test_get_order_stats(self):
+        "Test for invalid get request"
+        res = self.client().get('/order-stats')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['ticker_profit'])
+        self.assertTrue(data['total_profit'])
+
+    #def test_fail_get_order_stats(self):
+    #    "Test proper failure of get order-stats request"
+    #    res = self.client().get('/order-stats')
+    #    data = json.loads(res.data)
+
+    #    self.assertEqual(res.status_code, 404)
+    #    self.assertEqual(data['success'],False)
+
+    def test_post_open_order(self):
+        "Test a post to open_orders"
+        res = self.client().get('/open-orders', json=self.new_order)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+
+    def test_fail_post_open_order(self):
+        "Test a failed post to open_orders"
+        res = self.client().get('/open-orders/4000', json=self.new_order)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'],False)
+
+
+
+
+
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
