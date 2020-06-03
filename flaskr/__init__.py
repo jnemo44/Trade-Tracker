@@ -108,6 +108,9 @@ def create_app(test_config=None):
         new_type = body.get('trade_type',None)
         new_description = body.get('open_description',None)
 
+        if new_date is None:
+            abort(400)
+
         try:
             new_trade = Open(
             open_date=new_date,
