@@ -29,6 +29,12 @@ def create_app(test_config=None):
         #response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
+    @app.route('/logout', methods=['GET'])
+    def logout():
+        return jsonify ({
+            'logout':True
+        })
+
     @app.route('/open-orders', methods=['GET'])
     def open_orders():
         available_orders = Open.query.all()
