@@ -50,7 +50,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/order-stats', methods=['GET'])
-    #@requires_auth('get:order-stats')
+    @requires_auth('get:order-stats')
     def order_stats():
         num_opened = 0
         totals = {}
