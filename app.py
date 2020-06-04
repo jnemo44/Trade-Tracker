@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from database.models import setup_db, db_drop_and_create_all, Open, Close, db
 from auth.auth import AuthError, requires_auth
+from flask_migrate import Migrate
 
 
 def create_app(test_config=None):
@@ -282,9 +283,8 @@ def create_app(test_config=None):
             "message": error.error['code']
         }), error.status_code
 
-
     return app
-    # Local Dev
-    #if __name__ == '__main__':
-    #app.debug = True
-    #app.run()
+
+app = create_app()
+if __name__ == '__main__':
+    app.run()

@@ -13,7 +13,9 @@ database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filenam
 '''
 # Postgres Database
 database_name = "trade_tracker"
-database_path = "postgres://{}:{}@{}/{}".format('postgres', 'password','localhost:5432', database_name)
+# Local Dev
+#database_path = "postgres://{}:{}@{}/{}".format('postgres', 'password','localhost:5432', database_name)
+database_path = os.environ['DATABASE_URL']
 
 db = SQLAlchemy()
 
@@ -23,7 +25,8 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    db.create_all()
+    #Not needed if using migrations?
+    #db.create_all()
 
 # Use to re-initialize a clean database
 def db_drop_and_create_all():
