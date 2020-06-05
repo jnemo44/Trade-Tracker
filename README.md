@@ -19,13 +19,13 @@ Inside the trade_tracker top level folder run the following commands to start th
 
 #### Windows PS
 ```
-$ENV:FLASK_APP = 'flaskr'
+$ENV:FLASK_APP = 'app'
 $ENV:FLASK_ENV = 'development'
 flask run
 ```
 #### Bash
 ```
-export FLASK_APP=flaskr
+export FLASK_APP=app
 export FLASK_ENV=development
 flask run
 ```
