@@ -36,6 +36,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/open-orders', methods=['GET'])
+    @requires_auth('get:open-orders')
     def open_orders():
         available_orders = Open.query.all()
         current_trades = [orders.opening_trade() for orders in available_orders]
@@ -46,6 +47,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/close-orders', methods=['GET'])
+    @requires_auth('get:close-orders')
     def close_orders():
         available_orders = Close.query.all()
         current_trades = [orders.closing_trade() for orders in available_orders]
@@ -104,6 +106,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders', methods=['POST'])
+    @requires_auth('post:open-orders')
     def new_open_order():
         body = request.get_json()
         new_date = body.get('open_date',None)
@@ -144,6 +147,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/close-orders', methods=['POST'])
+    @requires_auth('post:close-orders')
     def new_close_order():
         body = request.get_json()
         new_oid = body.get('open_id',None)
@@ -178,6 +182,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['PATCH'])
+    @requires_auth('patch:open-orders')
     def edit_open_order(order_id):
         selected_order = Open.query.filter(Open.id == order_id).one_or_none()
 
@@ -208,6 +213,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/close-orders/<int:order_id>', methods=['PATCH'])
+    @requires_auth('patch:close-orders')
     def edit_close_order(order_id):
         selected_order = Close.query.filter(Close.id == order_id).one_or_none()
 
@@ -238,6 +244,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['DELETE'])
+    @requires_auth('delete:open-orders')
     def delete_open_order(order_id):
         # Deleting an open order will delete all matching closing orders
         selected_order = Open.query.filter(Open.id == order_id).one_or_none()
