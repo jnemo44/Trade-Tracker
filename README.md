@@ -5,7 +5,7 @@ This tool was born out of my personal desire to have a simple tool for keeping t
 ## Getting Started
 
 ### Required Dependancies
-* Python 3.7
+* Python 3.7+
 * Postgres (required for local dev)
 * Virtual Environment
 * PIP Dependencies
@@ -13,6 +13,9 @@ After activating the virtual environment run `pip install -r requirements.txt` t
 
 ### Create the Database
 For local development a database named trade_tracker is used. Using a tool like PgAdmin4 create that database ensuring the correct path is declared in models.py
+
+#### Data Modeling
+This database will consist of two tables (expanding in the future). It will have an open_orders table which will house any data associated with an opening trade and a close_table which will contain an open_order id as well as additional closing information.
 
 ### Run the Flask Server
 Inside the trade_tracker top level folder run the following commands to start the flask server. The FLASK_APP and FLASK_ENV commands are only required on first run.
@@ -53,16 +56,7 @@ Hosted URL: `https://trade-tracker-tool.herokuapp.com/`
 ### User Types
 Free User: Has access to all endpoints EXCEPT order-stats
 
-Free User JWT:
-```
-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkR2WFFWOXNwZEFOQ2V1SUVpZ1dJaSJ9.eyJpc3MiOiJodHRwczovL2ZzbmQtNDQtMi5hdXRoMC5jb20vIiwic3ViIjoiQWtRVVRBUTBacXR6T205TlkxaEtmTnVLOHZqU3U1ZFFAY2xpZW50cyIsImF1ZCI6Im9yZGVycyIsImlhdCI6MTU5MTM3Mzg4NiwiZXhwIjoxNTkxNDYwMjg2LCJhenAiOiJBa1FVVEFRMFpxdHpPbTlOWTFoS2ZOdUs4dmpTdTVkUSIsInNjb3BlIjoiZ2V0OmNsb3NlLW9yZGVycyBnZXQ6b3Blbi1vcmRlcnMgcG9zdDpjbG9zZS1vcmRlciBwb3N0Om9wZW4tb3JkZXJzIHBhdGNoOm9wZW4tb3JkZXJzIHBhdGNoOmNsb3NlLW9yZGVycyBkZWxldGU6b3Blbi1vcmRlcnMgZGVsZXRlOmNsb3NlLW9yZGVycyIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyIsInBlcm1pc3Npb25zIjpbImdldDpjbG9zZS1vcmRlcnMiLCJnZXQ6b3Blbi1vcmRlcnMiLCJwb3N0OmNsb3NlLW9yZGVyIiwicG9zdDpvcGVuLW9yZGVycyIsInBhdGNoOm9wZW4tb3JkZXJzIiwicGF0Y2g6Y2xvc2Utb3JkZXJzIiwiZGVsZXRlOm9wZW4tb3JkZXJzIiwiZGVsZXRlOmNsb3NlLW9yZGVycyJdfQ.sjNKkQpG_pQtteM9lokVRA5cl876VXTJ1qOldFVuc0zdETCewQsga7Vego8f7K7RngW6H30j52zyy3bUWLow_N1XvSWI39r-A76kXI0dFntIMmiv76iRRz4yxdmfR6H8liRkNtu8kJvmCV5CU__xOuDtC6Tfl8NhdluMIie6Nf8bdrWRHV1qwjRTshEKulP5Ki_RqKWk5tWThmVE__0sUpKyE2uAI5z0hU1jvag0zsEeOUqm3L-GFFj6TI7gxEG62f9xPDVguWq5nMqqf8Ykg8j85MUlX8iZza9bqVVj6Y6Km1-fQ5C29S9AVyIiieWi3xPUHRIznwKQx8PCoUYEuA
-```
 Premium User: Has access to all endpoints
-
-Premium User JWT:
-```
-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkR2WFFWOXNwZEFOQ2V1SUVpZ1dJaSJ9.eyJpc3MiOiJodHRwczovL2ZzbmQtNDQtMi5hdXRoMC5jb20vIiwic3ViIjoiQWtRVVRBUTBacXR6T205TlkxaEtmTnVLOHZqU3U1ZFFAY2xpZW50cyIsImF1ZCI6Im9yZGVycyIsImlhdCI6MTU5MTM3MzY4NCwiZXhwIjoxNTkxNDYwMDg0LCJhenAiOiJBa1FVVEFRMFpxdHpPbTlOWTFoS2ZOdUs4dmpTdTVkUSIsInNjb3BlIjoiZ2V0OmNsb3NlLW9yZGVycyBnZXQ6b3Blbi1vcmRlcnMgcG9zdDpjbG9zZS1vcmRlciBwb3N0Om9wZW4tb3JkZXJzIHBhdGNoOm9wZW4tb3JkZXJzIHBhdGNoOmNsb3NlLW9yZGVycyBkZWxldGU6b3Blbi1vcmRlcnMgZGVsZXRlOmNsb3NlLW9yZGVycyBnZXQ6b3JkZXItc3RhdHMiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJwZXJtaXNzaW9ucyI6WyJnZXQ6Y2xvc2Utb3JkZXJzIiwiZ2V0Om9wZW4tb3JkZXJzIiwicG9zdDpjbG9zZS1vcmRlciIsInBvc3Q6b3Blbi1vcmRlcnMiLCJwYXRjaDpvcGVuLW9yZGVycyIsInBhdGNoOmNsb3NlLW9yZGVycyIsImRlbGV0ZTpvcGVuLW9yZGVycyIsImRlbGV0ZTpjbG9zZS1vcmRlcnMiLCJnZXQ6b3JkZXItc3RhdHMiXX0.ZMr2FEW6v88CjeO2SQrKNpmJr0psUwPHcuEZ4vHHfZVmbiFaCkl0bx5beOPqd1sywAg8SiqhlEXH7cCxWgvW8jp1d93AdiVXebdj9_IEITPk3HSmMgd74h3DBg66VpwL_S5YNac_kbUDEAmyPHbAfyc7Wek8t_E6BEiV7Kxtz1QiTkIqkDqHvc4R7K19m77xRIGyMx64o4nvtjkLQipd87ewKu7F-cUzso69-jHU4oyqiU3Q-y1ViwSqfhSWn3nmZwrX72tTlp8weXSlfhnwnSVL2Hb4knvRIO_UAhrSmaqBysH3KYJ1ylolsGS36CNId9rOfravgNjJpUwUcj9u3A
-```
 
 ### Error Handling
 Standard HTTP response codes used.
@@ -409,4 +403,4 @@ Returns:
 Me. jnemo44. aka Joe N.
 
 ## Acknowledgments
-This porject was based on information taught by Udacity in their Full Stack Web Dev course and serves as my capstone project.
+This project was based on information taught by Udacity in their Full Stack Web Dev course and serves as my capstone project.
