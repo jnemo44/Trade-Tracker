@@ -16,6 +16,7 @@ For local development a database named trade_tracker is used. Using a tool like 
 
 ### Run the Flask Server
 Inside the trade_tracker top level folder run the following commands to start the flask server. The FLASK_APP and FLASK_ENV commands are only required on first run.
+
 #### Windows PS
 ```
 $ENV:FLASK_APP = 'flaskr'
@@ -69,6 +70,7 @@ The current API returns the following codes as JSON objects.
 #### GET `/open-orders`
 Returns a list of all open orders
 `curl https://trade-tracker-tool.herokuapp.com/open-orders`
+
 Returns:
 ```
 {
@@ -125,6 +127,7 @@ Returns:
 #### GET `/close-orders`
 Returns a list of all close orders
 `curl https://trade-tracker-tool.herokuapp.com/open-orders`
+
 Returns:
 ```
 {
@@ -177,6 +180,23 @@ Returns:
 #### GET `/order-stats`
 Based on your open and close orders this endpoint returns a few simple stats about your trade history.
 `curl https://trade-tracker-tool.herokuapp.com/order-stats`
+
+Returns:
+```
+{
+  "close_orders": 4,
+  "open_orders": 5,
+  "success": true,
+  "ticker_profit": {
+    "EEM": "1.47",
+    "FXI": "2.03",
+    "GPS": "1.75",
+    "XBI": "-2.00",
+    "XOP": "2.02"
+  },
+  "total_profit": "5.27"
+}
+```
 
 #### POST `/open-orders`
 Add a new open order using the following parameters in your request.
@@ -268,15 +288,94 @@ curl -X POST https://trade-tracker-tool.herokuapp.com/close-orders -H "Content-T
 	"close_description":"Close description"
 }' 
 ```
+Returns:
+```
+{
+  "close_list": [
+    {
+      "adjustment": false,
+      "buy_sell": "buy",
+      "close_date": "Mon, 25 May 2020 00:00:00 GMT",
+      "close_description": "Testing out the strategy",
+      "close_price": "0.87",
+      "id": 1,
+      "number_contracts": 1,
+      "open_id": 1
+    },
+    {
+      "adjustment": false,
+      "buy_sell": "buy",
+      "close_date": "Mon, 25 May 2020 00:00:00 GMT",
+      "close_description": "Testing out the strategy",
+      "close_price": "1.01",
+      "id": 2,
+      "number_contracts": 1,
+      "open_id": 2
+    },
+    {
+      "adjustment": false,
+      "buy_sell": "buy",
+      "close_date": "Mon, 25 May 2020 00:00:00 GMT",
+      "close_description": "Testing out the strategy",
+      "close_price": "0.54",
+      "id": 3,
+      "number_contracts": 1,
+      "open_id": 3
+    },
+    {
+      "adjustment": false,
+      "buy_sell": "buy",
+      "close_date": "Mon, 25 May 2020 00:00:00 GMT",
+      "close_description": "Testing out the strategy",
+      "close_price": "3.00",
+      "id": 4,
+      "number_contracts": 1,
+      "open_id": 4
+    }
+  ],
+  "success": true
+}
+```
 
 #### PATCH `/open-orders/<int:order_id>`
 This endpoint allows you to change only the open order description. The patch request expects a JSON object containing a new order description.
+`curl -X PATCH https://trade-tracker-tool.herokuapp.com/open-orders/1 -H "Content-Type: application/json" -d '{"open_description":"This i
+s a new description"}'`
+
+Returns:
+```
+{
+  "new_description": "This is a new description",
+  "success": true,
+  "updated_order_id": 1
+}
+```
 
 #### PATCH `/close-orders/<int:order_id>`
 This endpoint allows you to change only the close order description. The patch request expects a JSON object containing a new order description.
+`curl -X PATCH https://trade-tracker-tool.herokuapp.com/close-orders/1 -H "Content-Type: application/json" -d '{"open_description":"This
+is a new description"}'`
+
+Returns:
+```
+{
+  "new_description": "This is a new description",
+  "success": true,
+  "updated_order_id": 1
+}
+```
 
 #### DELETE `/open-orders/<int:order_id>`
 A delete request will cascade, by also deleting any close orders associated with the open-order being deleted. This ensures that no orphans are left in the close-orders table.
+`curl -X DELETE https://trade-tracker-tool.herokuapp.com/open-orders/1`
+
+Returns:
+```
+{
+  "deleted_id": 1,
+  "success": true
+}
+```
 
 ## Author
 Me. jnemo44. aka Joe N.
