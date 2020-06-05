@@ -47,6 +47,7 @@ python test_app.py
 ## API Reference
 ### Getting Started
 Base URL (Local Dev): `http://127.0.0.1:5000/`
+
 Hosted URL: `https://trade-tracker-tool.herokuapp.com/`
 
 ### Error Handling
