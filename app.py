@@ -14,25 +14,21 @@ def create_app(test_config=None):
     setup_db(app)
     CORS(app)
 
-    #db_drop_and_create_all()
+    # Command used to reset database tables
+    # db_drop_and_create_all()
 
-    '''
-    # Hosted deployment
-    if __name__ == '__main__':
-        APP.run(host='0.0.0.0', port=8080, debug=True)
-    '''
-    #Use the after_request decorator to set Access-Control-Allow
+    # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        #response.headers.add('Access-Control-Allow-Credentials', 'true')
+        # response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
     @app.route('/logout', methods=['GET'])
     def logout():
-        return jsonify ({
-            'logout':True
+        return jsonify({
+            'logout': True
         })
 
     @app.route('/open-orders', methods=['GET'])
@@ -40,10 +36,10 @@ def create_app(test_config=None):
     def open_orders():
         available_orders = Open.query.all()
         current_trades = [orders.opening_trade() for orders in available_orders]
-        
-        return jsonify ({
-            'success':True,
-            'open_list':current_trades
+
+        return jsonify({
+            'success': True,
+            'open_list': current_trades
         })
 
     @app.route('/close-orders', methods=['GET'])
@@ -52,9 +48,9 @@ def create_app(test_config=None):
         available_orders = Close.query.all()
         current_trades = [orders.closing_trade() for orders in available_orders]
 
-        return jsonify ({
-            'success':True,
-            'close_list':current_trades
+        return jsonify({
+            'success': True,
+            'close_list': current_trades
         })
 
     @app.route('/order-stats', methods=['GET'])
@@ -76,7 +72,7 @@ def create_app(test_config=None):
         try:
             # Go through every open order and find coresponding close orders
             while num_opened < len(open_orders):
-                close_price = db.session.query(Close.close_price, Close.number_contracts).filter(Close.open_id==open_orders[num_opened].id).all()    
+                close_price = db.session.query(Close.close_price, Close.number_contracts).filter(Close.open_id == open_orders[num_opened].id).all()
                 ticker_profit = open_orders[num_opened].open_price
                 # For every open trade subtract cost of closing trade
                 for cost in close_price:
@@ -86,20 +82,20 @@ def create_app(test_config=None):
                     ticker_profit -= cost[0] * contracts_closed
                 else:
                     ticker_profit += cost[0] * contracts_closed
-                #Convert decimal to a str for JSON
+                # Convert decimal to a str for JSON
                 totals[open_orders[num_opened].ticker] = str(ticker_profit)
-                num_opened+=1
+                num_opened += 1
 
             # Calculate total profit
             for price in totals.values():
                 total_profit += float(price)
 
-            return jsonify ({
-                'success':True,
-                'open_orders':len(open_orders),
-                'close_orders':len(close_orders),
-                'ticker_profit':totals,
-                'total_profit':str(round(total_profit,2))
+            return jsonify({
+                'success': True,
+                'open_orders': len(open_orders),
+                'close_orders': len(close_orders),
+                'ticker_profit': totals,
+                'total_profit': str(round(total_profit, 2))
 
             })
         except:
@@ -109,39 +105,39 @@ def create_app(test_config=None):
     @requires_auth('post:open-orders')
     def new_open_order():
         body = request.get_json()
-        new_date = body.get('open_date',None)
-        new_buy_sell = body.get('buy_sell',None)
-        new_ticker = body.get('ticker',None)
-        new_contracts = body.get('number_contracts',None)
-        new_price = body.get('open_price',None)
-        new_adjustment = body.get('adjustment',None)
-        new_type = body.get('trade_type',None)
-        new_description = body.get('open_description',None)
+        new_date = body.get('open_date', None)
+        new_buy_sell = body.get('buy_sell', None)
+        new_ticker = body.get('ticker', None)
+        new_contracts = body.get('number_contracts', None)
+        new_price = body.get('open_price', None)
+        new_adjustment = body.get('adjustment', None)
+        new_type = body.get('trade_type', None)
+        new_description = body.get('open_description', None)
 
         if new_date is None:
             abort(400)
 
         try:
             new_trade = Open(
-            open_date=new_date,
-            buy_sell=new_buy_sell,
-            ticker=new_ticker,
-            number_contracts=new_contracts,
-            open_price=new_price,
-            adjustment=new_adjustment,
-            trade_type=new_type,
-            open_description=new_description
+                open_date=new_date,
+                buy_sell=new_buy_sell,
+                ticker=new_ticker,
+                number_contracts=new_contracts,
+                open_price=new_price,
+                adjustment=new_adjustment,
+                trade_type=new_type,
+                open_description=new_description
             )
 
             # Add new model to the database
             new_trade.insert()
 
             available_orders = Open.query.all()
-            current_trades = [orders.opening_trade() for orders in available_orders] 
+            current_trades = [orders.opening_trade() for orders in available_orders]
 
-            return jsonify ({
-            'success':True,
-            'current_trades':current_trades
+            return jsonify({
+                'success': True,
+                'current_trades': current_trades
             })
         except:
             abort(422)
@@ -150,23 +146,23 @@ def create_app(test_config=None):
     @requires_auth('post:close-orders')
     def new_close_order():
         body = request.get_json()
-        new_oid = body.get('open_id',None)
-        new_date = body.get('close_date',None)
-        new_buy_sell = body.get('buy_sell',None)
-        new_contracts = body.get('number_contracts',None)
-        new_price = body.get('close_price',None)
-        new_adjustment = body.get('adjustment',None)
-        new_description = body.get('close_description',None)
+        new_oid = body.get('open_id', None)
+        new_date = body.get('close_date', None)
+        new_buy_sell = body.get('buy_sell', None)
+        new_contracts = body.get('number_contracts', None)
+        new_price = body.get('close_price', None)
+        new_adjustment = body.get('adjustment', None)
+        new_description = body.get('close_description', None)
 
         try:
             new_trade = Close(
-            open_id = new_oid,
-            close_date = new_date,
-            buy_sell = new_buy_sell,
-            number_contracts = new_contracts,
-            close_price = new_price,
-            adjustment = new_adjustment,
-            close_description = new_description
+                open_id=new_oid,
+                close_date=new_date,
+                buy_sell=new_buy_sell,
+                number_contracts=new_contracts,
+                close_price=new_price,
+                adjustment=new_adjustment,
+                close_description=new_description
             )
 
             new_trade.insert()
@@ -174,9 +170,9 @@ def create_app(test_config=None):
             available_orders = Close.query.all()
             current_trades = [orders.closing_trade() for orders in available_orders]
 
-            return jsonify ({
-            'success':True,
-            'close_orders':current_trades
+            return jsonify({
+                'success': True,
+                'close_orders': current_trades
             })
         except:
             abort(422)
@@ -189,10 +185,10 @@ def create_app(test_config=None):
         # Order not found
         if selected_order is None:
             abort(404)
-        
+
         body = request.get_json()
         # Currently only allow updating the description
-        new_description = body.get('open_description',None)
+        new_description = body.get('open_description', None)
 
         # Bad Request
         if new_description is None:
@@ -203,12 +199,12 @@ def create_app(test_config=None):
             selected_order.open_description = new_description
             selected_order.update()
 
-            return jsonify ({
-            'success':True,
-            'updated_order_id':order_id,
-            'new_description':new_description
+            return jsonify({
+                'success': True,
+                'updated_order_id': order_id,
+                'new_description': new_description
             })
-        
+
         except:
             abort(422)
 
@@ -220,10 +216,10 @@ def create_app(test_config=None):
         # Order not found
         if selected_order is None:
             abort(404)
-        
+
         body = request.get_json()
         # Currently only allow updating the description
-        new_description = body.get('close_description',None)
+        new_description = body.get('close_description', None)
 
         # Bad Request
         if new_description is None:
@@ -234,10 +230,10 @@ def create_app(test_config=None):
             selected_order.close_description = new_description
             selected_order.update()
 
-            return jsonify ({
-            'success':True,
-            'updated_order_id':order_id,
-            'new_description':new_description
+            return jsonify({
+                'success': True,
+                'updated_order_id': order_id,
+                'new_description': new_description
             })
 
         except:
@@ -256,9 +252,9 @@ def create_app(test_config=None):
         try:
             selected_order.delete()
 
-            return jsonify ({
-            'success':True,
-            'deleted_id':order_id
+            return jsonify({
+                'success': True,
+                'deleted_id': order_id
             })
 
         except:
@@ -267,26 +263,26 @@ def create_app(test_config=None):
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({
-            'success':False,
-            'error':400,
-            'message':'Bad Request'
-        }),400
+            'success': False,
+            'error': 400,
+            'message': 'Bad Request'
+        }), 400
 
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
-            'success':False,
-            'error':404,
-            'message':'Resource not found!'
-        }),404
+            'success': False,
+            'error': 404,
+            'message': 'Resource not found!'
+        }), 404
 
     @app.errorhandler(422)
     def unprocessable(error):
         return jsonify({
-            'success':False,
-            'error':422,
-            'message':'Unprocessable'
-        }),422
+            'success': False,
+            'error': 422,
+            'message': 'Unprocessable'
+        }), 422
 
     @app.errorhandler(AuthError)
     def authorization_error(error):
