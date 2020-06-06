@@ -1,7 +1,15 @@
 import os
 import json
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, DateTime, Numeric, Boolean, String, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    DateTime,
+    Numeric,
+    Boolean,
+    String,
+    ForeignKey
+)
 
 '''
 #SQL Lite Database
@@ -12,8 +20,8 @@ database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filenam
 # Postgres Database
 database_name = "trade_tracker"
 # Local Dev
-# database_path = "postgres://{}:{}@{}/{}".format('postgres', 'password','localhost:5432', database_name)
-database_path = os.environ['DATABASE_URL']
+database_path = "postgres://{}:{}@{}/{}".format('postgres', 'password','localhost:5432', database_name)
+# database_path = os.environ['DATABASE_URL']
 
 db = SQLAlchemy()
 
@@ -33,8 +41,26 @@ def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
 
+# Extend the base model class to add common methods
+class HelperFunctions(db.Model):
+    __abstract__ = True
 
-class Open(db.Model):
+    # Adds new entry to the database
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    # Update exsisting order
+    def update(self):
+        db.session.commit()
+
+    # Delete open order
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class Open(HelperFunctions):
     __tablename__ = 'open_orders'
 
     id = Column(Integer, primary_key=True)
@@ -62,22 +88,8 @@ class Open(db.Model):
             'open_description': self.open_description
         }
 
-    # Adds new entry to the database
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    # Update exsisting order
-    def update(self):
-        db.session.commit()
-
-    # Delete open order
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-
-class Close(db.Model):
+    
+class Close(HelperFunctions):
     __tablename__ = 'close_orders'
 
     id = Column(Integer, primary_key=True)
@@ -102,13 +114,6 @@ class Close(db.Model):
             'close_description': self.close_description
         }
 
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    # Update exsisting order
-    def update(self):
-        db.session.commit()
 
 
     
