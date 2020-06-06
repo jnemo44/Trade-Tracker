@@ -9,7 +9,9 @@ AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
 ALGORITHMS = os.environ.get('ALGORITHMS')
 API_AUDIENCE = os.environ.get('API_AUDIENCE')
 
-## AuthError Exception
+# AuthError Exception
+
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -22,40 +24,44 @@ def get_token_auth_header():
     if not authorize:
         raise AuthError({
             'code': 'authorization_header_missing',
-            'description':'Authorization in header is expected'
+            'description': 'Authorization in header is expected'
         }, 401)
 
     parts = authorize.split()
     if parts[0].lower() != 'bearer':
         raise AuthError({
             'code': 'invalid_header',
-            'description':'The token sent does not start with bearer'
+            'description': 'The token sent does not start with bearer'
         }, 401)
     elif len(parts) != 2:
         raise AuthError({
             'code': 'token_malformed',
-            'description':'The token is not formatted correctly'
+            'description': 'The token is not formatted correctly'
         }, 401)
 
     token = parts[1]
-    return token     
+    return token
 
 # Check JWT permissions
+
+
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
         raise AuthError({
-            'code':'permissions_not_in_payload',
-            'description':'Permissions not found in token'
-        },401)
+            'code': 'permissions_not_in_payload',
+            'description': 'Permissions not found in token'
+        }, 401)
     if permission not in payload['permissions']:
         raise AuthError({
-            'code':'requested_permission_not_allowed',
-            'description':'You have requested a permission not allowed'
-        },401)
-    
+            'code': 'requested_permission_not_allowed',
+            'description': 'You have requested a permission not allowed'
+        }, 401)
+
     return True
 
 # Parse and verify JWT
+
+
 def verify_decode_jwt(token):
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
@@ -63,9 +69,9 @@ def verify_decode_jwt(token):
     rsa_key = {}
     if 'kid' not in unverified_header:
         raise AuthError({
-            'code':'invalid_header',
-            'description':'No key found in header'
-    }, 401)
+            'code': 'invalid_header',
+            'description': 'No key found in header'
+        }, 401)
 
     for key in jwks['keys']:
         if key['kid'] == unverified_header['kid']:
@@ -83,7 +89,7 @@ def verify_decode_jwt(token):
                 rsa_key,
                 algorithms=ALGORITHMS,
                 audience=API_AUDIENCE,
-                issuer='https://'+AUTH0_DOMAIN+'/'
+                issuer='https://' + AUTH0_DOMAIN + '/'
             )
 
             return payload
@@ -105,13 +111,13 @@ def verify_decode_jwt(token):
                 'description': 'Unable to parse authentication token.'
             }, 400)
     raise AuthError({
-                'code':'invalid_header',
+        'code': 'invalid_header',
                 'description': 'Unable to locate the correct key'
-            }, 400)
-        
+    }, 400)
 
 
-# Authorization decorator method accepts required permission as an input to validate against JWT
+# Authorization decorator method accepts required permission as an input
+# to validate against JWT
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
@@ -119,15 +125,15 @@ def requires_auth(permission=''):
             token = get_token_auth_header()
             try:
                 payload = verify_decode_jwt(token)
-            except:
+            except BaseException:
                 raise AuthError({
                     'code': 'authorization_header_missing',
-                    'description':'Authorization in header is expected'
+                    'description': 'Authorization in header is expected'
                 }, 401)
 
             check_permissions(permission, payload)
 
-            return f(*args, **kwargs) #payload, 
+            return f(*args, **kwargs)  # payload,
 
         return wrapper
     return requires_auth_decorator

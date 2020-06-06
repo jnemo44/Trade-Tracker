@@ -26,8 +26,12 @@ def create_app(test_config=None):
     # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add(
+            'Access-Control-Allow-Headers',
+            'Content-Type,Authorization,true')
+        response.headers.add(
+            'Access-Control-Allow-Methods',
+            'GET,PUT,POST,DELETE,OPTIONS')
         # response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
@@ -47,7 +51,8 @@ def create_app(test_config=None):
     @requires_auth('get:open-orders')
     def open_orders():
         available_orders = Open.query.all()
-        current_trades = [orders.opening_trade() for orders in available_orders]
+        current_trades = [orders.opening_trade()
+                          for orders in available_orders]
 
         return jsonify({
             'success': True,
@@ -58,7 +63,8 @@ def create_app(test_config=None):
     @requires_auth('get:close-orders')
     def close_orders():
         available_orders = Close.query.all()
-        current_trades = [orders.closing_trade() for orders in available_orders]
+        current_trades = [orders.closing_trade()
+                          for orders in available_orders]
 
         return jsonify({
             'success': True,
@@ -84,7 +90,9 @@ def create_app(test_config=None):
         try:
             # Go through every open order and find coresponding close orders
             while num_opened < len(open_orders):
-                close_price = db.session.query(Close.close_price, Close.number_contracts).filter(Close.open_id == open_orders[num_opened].id).all()
+                close_price = db.session.query(
+                    Close.close_price, Close.number_contracts).filter(
+                    Close.open_id == open_orders[num_opened].id).all()
                 ticker_profit = open_orders[num_opened].open_price
                 # For every open trade subtract cost of closing trade
                 for cost in close_price:
@@ -110,7 +118,7 @@ def create_app(test_config=None):
                 'total_profit': str(round(total_profit, 2))
 
             })
-        except:
+        except BaseException:
             # Report specific error
             print(sys.exc_info())
             abort(422)
@@ -147,13 +155,14 @@ def create_app(test_config=None):
             new_trade.insert()
 
             available_orders = Open.query.all()
-            current_trades = [orders.opening_trade() for orders in available_orders]
+            current_trades = [orders.opening_trade()
+                              for orders in available_orders]
 
             return jsonify({
                 'success': True,
                 'current_trades': current_trades
             })
-        except:
+        except BaseException:
             # Report specific error
             print(sys.exc_info())
             abort(422)
@@ -184,13 +193,14 @@ def create_app(test_config=None):
             new_trade.insert()
 
             available_orders = Close.query.all()
-            current_trades = [orders.closing_trade() for orders in available_orders]
+            current_trades = [orders.closing_trade()
+                              for orders in available_orders]
 
             return jsonify({
                 'success': True,
                 'close_orders': current_trades
             })
-        except:
+        except BaseException:
             # Report specific error
             print(sys.exc_info())
             abort(422)
@@ -223,7 +233,7 @@ def create_app(test_config=None):
                 'new_description': new_description
             })
 
-        except:
+        except BaseException:
             # Report specific error
             print(sys.exc_info())
             abort(422)
@@ -256,7 +266,7 @@ def create_app(test_config=None):
                 'new_description': new_description
             })
 
-        except:
+        except BaseException:
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['DELETE'])
@@ -277,7 +287,7 @@ def create_app(test_config=None):
                 'deleted_id': order_id
             })
 
-        except:
+        except BaseException:
             # Report specific error
             print(sys.exc_info())
             abort(422)
@@ -309,12 +319,13 @@ def create_app(test_config=None):
     @app.errorhandler(AuthError)
     def authorization_error(error):
         return jsonify({
-            "success": False, 
+            "success": False,
             "error": error.status_code,
             "message": error.error['code']
         }), error.status_code
 
     return app
+
 
 app = create_app()
 if __name__ == '__main__':
