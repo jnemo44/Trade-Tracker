@@ -20,7 +20,8 @@ database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filenam
 # Postgres Database
 database_name = "trade_tracker"
 # Local Dev
-database_path = "postgres://{}:{}@{}/{}".format('postgres', 'password','localhost:5432', database_name)
+database_path = "postgres://{}:{}@{}/{}".format(
+    'postgres', 'password', 'localhost:5432', database_name)
 # database_path = os.environ['DATABASE_URL']
 
 db = SQLAlchemy()
@@ -42,6 +43,8 @@ def db_drop_and_create_all():
     db.create_all()
 
 # Extend the base model class to add common methods
+
+
 class HelperFunctions(db.Model):
     __abstract__ = True
 
@@ -72,8 +75,15 @@ class Open(HelperFunctions):
     adjustment = Column(Boolean, nullable=False)
     trade_type = Column(String(100))
     open_description = Column(String(500))
-    # Relationship is one to many (An open order can have multiple close orders)
-    open_close = db.relationship('Close', backref='open', cascade='all,delete', passive_deletes=True, lazy=True,)
+    # Relationship is one to many (An open order can have multiple close
+    # orders)
+    open_close = db.relationship(
+        'Close',
+        backref='open',
+        cascade='all,delete',
+        passive_deletes=True,
+        lazy=True,
+    )
 
     def opening_trade(self):
         return {
@@ -88,13 +98,19 @@ class Open(HelperFunctions):
             'open_description': self.open_description
         }
 
-    
+
 class Close(HelperFunctions):
     __tablename__ = 'close_orders'
 
     id = Column(Integer, primary_key=True)
-    # Add foreign key ondelete of open_order delete all coresponding closing orders
-    open_id = Column(Integer, ForeignKey('open_orders.id', ondelete='cascade'), nullable=False)
+    # Add foreign key on delete of open_order 
+    # delete all coresponding closing orders
+    open_id = Column(
+        Integer,
+        ForeignKey(
+            'open_orders.id',
+            ondelete='cascade'),
+        nullable=False)
     close_date = Column(DateTime, nullable=False)
     buy_sell = Column(String(5), nullable=False)
     number_contracts = Column(Integer, nullable=False)
@@ -113,12 +129,3 @@ class Close(HelperFunctions):
             'adjustment': self.adjustment,
             'close_description': self.close_description
         }
-
-
-
-    
-    
-
-
-
-
