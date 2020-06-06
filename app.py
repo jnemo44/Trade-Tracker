@@ -3,7 +3,13 @@ import decimal
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from database.models import setup_db, db_drop_and_create_all, Open, Close, db
+from database.models import (
+    setup_db,
+    db_drop_and_create_all,
+    Open,
+    Close,
+    db
+)
 from auth.auth import AuthError, requires_auth
 from flask_migrate import Migrate
 
@@ -24,6 +30,12 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         # response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
+
+    @app.route('/', methods=['GET'])
+    def index():
+        return jsonify({
+            'message': 'Welcome to the trade tracker tool!'
+        })
 
     @app.route('/logout', methods=['GET'])
     def logout():
@@ -99,6 +111,8 @@ def create_app(test_config=None):
 
             })
         except:
+            # Report specific error
+            print(sys.exc_info())
             abort(422)
 
     @app.route('/open-orders', methods=['POST'])
@@ -140,6 +154,8 @@ def create_app(test_config=None):
                 'current_trades': current_trades
             })
         except:
+            # Report specific error
+            print(sys.exc_info())
             abort(422)
 
     @app.route('/close-orders', methods=['POST'])
@@ -175,6 +191,8 @@ def create_app(test_config=None):
                 'close_orders': current_trades
             })
         except:
+            # Report specific error
+            print(sys.exc_info())
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['PATCH'])
@@ -206,6 +224,8 @@ def create_app(test_config=None):
             })
 
         except:
+            # Report specific error
+            print(sys.exc_info())
             abort(422)
 
     @app.route('/close-orders/<int:order_id>', methods=['PATCH'])
@@ -258,6 +278,8 @@ def create_app(test_config=None):
             })
 
         except:
+            # Report specific error
+            print(sys.exc_info())
             abort(422)
 
     @app.errorhandler(400)
