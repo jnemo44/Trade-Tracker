@@ -48,7 +48,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/open-orders', methods=['GET'])
-    @requires_auth('get:open-orders')
+    #@requires_auth('get:open-orders')
     def open_orders():
         available_orders = Open.query.all()
         current_trades = [orders.opening_trade()
@@ -60,7 +60,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/close-orders', methods=['GET'])
-    @requires_auth('get:close-orders')
+    #@requires_auth('get:close-orders')
     def close_orders():
         available_orders = Close.query.all()
         current_trades = [orders.closing_trade()
