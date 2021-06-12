@@ -21,7 +21,7 @@ def create_app(test_config=None):
     CORS(app)
 
     # Command used to reset database tables
-    # db_drop_and_create_all()
+    #db_drop_and_create_all()
 
     # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
@@ -124,31 +124,33 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders', methods=['POST'])
-    @requires_auth('post:open-orders')
+    #@requires_auth('post:open-orders')
     def new_open_order():
         body = request.get_json()
-        new_date = body.get('open_date', None)
-        new_buy_sell = body.get('buy_sell', None)
+        new_open_date = body.get('openDate', None)
+        new_expiration_date = body.get('expirationDate', None)
+        new_buy_sell = body.get('buyOrSell', None)
         new_ticker = body.get('ticker', None)
-        new_contracts = body.get('number_contracts', None)
-        new_price = body.get('open_price', None)
+        new_contracts = body.get('numContracts', None)
+        new_price = body.get('openPrice', None)
         new_adjustment = body.get('adjustment', None)
-        new_type = body.get('trade_type', None)
-        new_description = body.get('open_description', None)
+        new_type = body.get('spread', None)
+        new_description = body.get('openNotes', None)
 
-        if new_date is None:
+        if new_open_date is None:
             abort(400)
 
         try:
             new_trade = Open(
-                open_date=new_date,
-                buy_sell=new_buy_sell,
+                openDate=new_open_date,
+                expirationDate=new_expiration_date,
+                buyOrSell=new_buy_sell,
                 ticker=new_ticker,
-                number_contracts=new_contracts,
-                open_price=new_price,
+                numContracts=new_contracts,
+                openPrice=new_price,
                 adjustment=new_adjustment,
-                trade_type=new_type,
-                open_description=new_description
+                spread=new_type,
+                openNotes=new_description
             )
 
             # Add new model to the database

@@ -21,7 +21,7 @@ database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filenam
 database_name = "trade_tracker"
 # Local Dev
 database_path = "postgres://{}:{}@{}/{}".format(
-    'postgres', 'password', 'localhost:5432', database_name)
+    'jniemiec', 'password', 'localhost:5432', database_name)
 # database_path = os.environ['DATABASE_URL']
 
 db = SQLAlchemy()
@@ -67,14 +67,15 @@ class Open(HelperFunctions):
     __tablename__ = 'open_orders'
 
     id = Column(Integer, primary_key=True)
-    open_date = Column(DateTime, nullable=False)
-    buy_sell = Column(String(5), nullable=False)
-    ticker = Column(String(10))
-    number_contracts = Column(Integer, nullable=False)
-    open_price = Column(Numeric(precision=10, scale=2), nullable=False)
+    openDate = Column(DateTime, nullable=False)
+    expirationDate = Column(DateTime, nullable=False)
+    buyOrSell = Column(String(5), nullable=False)
+    ticker = Column(String(10), nullable=False)
+    numContracts = Column(Integer, nullable=False)
+    openPrice = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
-    trade_type = Column(String(100))
-    open_description = Column(String(500))
+    spread = Column(String(100))
+    openNotes = Column(String(500))
     # Relationship is one to many (An open order can have multiple close
     # orders)
     open_close = db.relationship(
@@ -88,14 +89,15 @@ class Open(HelperFunctions):
     def opening_trade(self):
         return {
             'id': self.id,
-            'open_date': self.open_date,
-            'buy_sell': self.buy_sell,
+            'openDate': self.openDate,
+            'expirationDate': self.expirationDate,
+            'buyOrSell': self.buyOrSell,
             'ticker': self.ticker,
-            'number_contracts': self.number_contracts,
-            'open_price': str(self.open_price),
+            'numContracts': self.numContracts,
+            'openPrice': str(self.openPrice),
             'adjustment': self.adjustment,
-            'trade_type': self.trade_type,
-            'open_description': self.open_description
+            'spread': self.spread,
+            'openNotes': self.openNotes
         }
 
 
