@@ -21,18 +21,19 @@ def create_app(test_config=None):
     CORS(app)
 
     # Command used to reset database tables
-    #db_drop_and_create_all()
+    # db_drop_and_create_all()
 
     # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
     def after_request(response):
+        print('AFterREquest')
         response.headers.add(
             'Access-Control-Allow-Headers',
             'Content-Type,Authorization,true')
         response.headers.add(
             'Access-Control-Allow-Methods',
             'GET,PUT,POST,DELETE,OPTIONS')
-        # response.headers.add('Access-Control-Allow-Credentials', 'true')
+        #response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
     @app.route('/', methods=['GET'])
@@ -142,15 +143,15 @@ def create_app(test_config=None):
 
         try:
             new_trade = Open(
-                openDate=new_open_date,
-                expirationDate=new_expiration_date,
-                buyOrSell=new_buy_sell,
+                open_date=new_open_date,
+                expiration_date=new_expiration_date,
+                buy_or_sell=new_buy_sell,
                 ticker=new_ticker,
-                numContracts=new_contracts,
-                openPrice=new_price,
+                number_contracts=new_contracts,
+                open_price=new_price,
                 adjustment=new_adjustment,
                 spread=new_type,
-                openNotes=new_description
+                open_notes=new_description
             )
 
             # Add new model to the database
@@ -170,16 +171,18 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/close-orders', methods=['POST'])
-    @requires_auth('post:close-orders')
+    #@requires_auth('post:close-orders')
     def new_close_order():
         body = request.get_json()
-        new_oid = body.get('open_id', None)
-        new_date = body.get('close_date', None)
-        new_buy_sell = body.get('buy_sell', None)
-        new_contracts = body.get('number_contracts', None)
-        new_price = body.get('close_price', None)
+        print(body)
+        new_oid = body.get('openID', None)
+        new_date = body.get('closeDate', None)
+        new_buy_sell = body.get('buyOrSell', None)
+        new_contracts = body.get('numContracts', None)
+        new_price = body.get('closePrice', None)
         new_adjustment = body.get('adjustment', None)
-        new_description = body.get('close_description', None)
+        new_notes = body.get('closeNotes', None)
+        new_status = body.get('closedTrade', None)
 
         try:
             new_trade = Close(
@@ -189,7 +192,8 @@ def create_app(test_config=None):
                 number_contracts=new_contracts,
                 close_price=new_price,
                 adjustment=new_adjustment,
-                close_description=new_description
+                close_notes=new_notes,
+                close_status=new_status
             )
 
             new_trade.insert()
