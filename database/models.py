@@ -10,6 +10,7 @@ from sqlalchemy import (
     String,
     ForeignKey
 )
+from sqlalchemy.sql.sqltypes import BOOLEAN
 
 '''
 #SQL Lite Database
@@ -74,6 +75,7 @@ class Open(HelperFunctions):
     number_contracts = Column(Integer, nullable=False)
     open_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
+    closed = Column(Boolean, nullable=False)
     spread = Column(String(100))
     open_notes = Column(String(500))
     # Relationship is one to many (An open order can have multiple close
@@ -118,7 +120,6 @@ class Close(HelperFunctions):
     number_contracts = Column(Integer, nullable=False)
     close_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
-    closed_trade = Column(Boolean, nullable=False)
     close_notes = Column(String(400))
 
     def closing_trade(self):
@@ -130,6 +131,5 @@ class Close(HelperFunctions):
             'numContracts': self.number_contracts,
             'closePrice': str(self.close_price),
             'adjustment': self.adjustment,
-            'closedTrade': self.closed_trade,
             'closeNotes': self.close_notes
         }

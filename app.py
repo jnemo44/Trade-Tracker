@@ -4,6 +4,7 @@ import decimal
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from sqlalchemy.sql.expression import false
 from database.models import (
     setup_db,
     db_drop_and_create_all,
@@ -22,7 +23,7 @@ def create_app(test_config=None):
     CORS(app)
 
     # Command used to reset database tables
-    db_drop_and_create_all()
+    #db_drop_and_create_all()
 
     # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
@@ -51,7 +52,7 @@ def create_app(test_config=None):
     @app.route('/open-orders', methods=['GET'])
     #@requires_auth('get:open-orders')
     def open_orders():
-        available_orders = Open.query.all()
+        available_orders = Open.query.filter(Open.closed == 'false').all()
         current_trades = [orders.opening_trade()
                           for orders in available_orders]
 
@@ -135,8 +136,9 @@ def create_app(test_config=None):
         new_contracts = body.get('numContracts', None)
         new_price = body.get('openPrice', None)
         new_adjustment = body.get('adjustment', None)
-        new_type = body.get('spread', None)
-        new_description = body.get('openNotes', None)
+        new_closed = body.get('closed', None)
+        new_spread = body.get('spread', None)
+        new_open_notes = body.get('openNotes', None)
 
         if new_open_date is None:
             abort(400)
@@ -149,9 +151,10 @@ def create_app(test_config=None):
                 ticker=new_ticker,
                 number_contracts=new_contracts,
                 open_price=new_price,
+                spread=new_spread,
                 adjustment=new_adjustment,
-                spread=new_type,
-                open_notes=new_description
+                closed=new_closed,
+                open_notes=new_open_notes
             )
 
             # Add new model to the database
@@ -181,7 +184,6 @@ def create_app(test_config=None):
         new_price = body.get('closePrice', None)
         new_adjustment = body.get('adjustment', None)
         new_notes = body.get('closeNotes', None)
-        new_closed_trade = body.get('closedTrade', None)
 
         try:
             new_trade = Close(
@@ -192,7 +194,6 @@ def create_app(test_config=None):
                 close_price=new_price,
                 adjustment=new_adjustment,
                 close_notes=new_notes,
-                closed_trade=new_closed_trade
             )
 
             new_trade.insert()
@@ -211,7 +212,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['PATCH'])
-    @requires_auth('patch:open-orders')
+    #@requires_auth('patch:open-orders')
     def edit_open_order(order_id):
         selected_order = Open.query.filter(Open.id == order_id).one_or_none()
 
@@ -220,22 +221,22 @@ def create_app(test_config=None):
             abort(404)
 
         body = request.get_json()
-        # Currently only allow updating the description
-        new_description = body.get('open_description', None)
+        # Currently only allow updating the closed flag
+        new_closed = body.get('closed', None)
 
         # Bad Request
-        if new_description is None:
+        if new_closed is None:
             abort(400)
 
         try:
             # Push update to database
-            selected_order.open_description = new_description
+            selected_order.closed = new_closed
             selected_order.update()
 
             return jsonify({
                 'success': True,
                 'updated_order_id': order_id,
-                'new_description': new_description
+                'new_closed': new_closed
             })
 
         except BaseException:
@@ -244,7 +245,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/close-orders/<int:order_id>', methods=['PATCH'])
-    @requires_auth('patch:close-orders')
+    #@requires_auth('patch:close-orders')
     def edit_close_order(order_id):
         selected_order = Close.query.filter(Close.id == order_id).one_or_none()
 
@@ -275,7 +276,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/open-orders/<int:order_id>', methods=['DELETE'])
-    @requires_auth('delete:open-orders')
+    #@requires_auth('delete:open-orders')
     def delete_open_order(order_id):
         # Deleting an open order will delete all matching closing orders
         selected_order = Open.query.filter(Open.id == order_id).one_or_none()
