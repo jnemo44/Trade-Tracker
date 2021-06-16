@@ -1,4 +1,5 @@
 import os
+import sys
 import decimal
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -21,12 +22,11 @@ def create_app(test_config=None):
     CORS(app)
 
     # Command used to reset database tables
-    # db_drop_and_create_all()
+    db_drop_and_create_all()
 
     # Use the after_request decorator to set Access-Control-Allow
     @app.after_request
     def after_request(response):
-        print('AFterREquest')
         response.headers.add(
             'Access-Control-Allow-Headers',
             'Content-Type,Authorization,true')
@@ -174,7 +174,6 @@ def create_app(test_config=None):
     #@requires_auth('post:close-orders')
     def new_close_order():
         body = request.get_json()
-        print(body)
         new_oid = body.get('openID', None)
         new_date = body.get('closeDate', None)
         new_buy_sell = body.get('buyOrSell', None)
@@ -182,7 +181,7 @@ def create_app(test_config=None):
         new_price = body.get('closePrice', None)
         new_adjustment = body.get('adjustment', None)
         new_notes = body.get('closeNotes', None)
-        new_status = body.get('closedTrade', None)
+        new_closed_trade = body.get('closedTrade', None)
 
         try:
             new_trade = Close(
@@ -193,7 +192,7 @@ def create_app(test_config=None):
                 close_price=new_price,
                 adjustment=new_adjustment,
                 close_notes=new_notes,
-                close_status=new_status
+                closed_trade=new_closed_trade
             )
 
             new_trade.insert()
