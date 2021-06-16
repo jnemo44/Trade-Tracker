@@ -119,7 +119,7 @@ class Close(HelperFunctions):
     close_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
     closed_trade = Column(Boolean, nullable=False)
-    close_notes = Column(String(500))
+    close_notes = Column(String(400))
 
     def closing_trade(self):
         return {
