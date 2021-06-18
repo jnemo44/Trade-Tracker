@@ -124,7 +124,7 @@ class Close(HelperFunctions):
 
     def closing_trade(self):
         return {
-            'id': self.id,
+            'closeID': self.id,
             'openID': self.open_id,
             'closeDate': self.close_date,
             'buyOrSell': self.buy_sell,

@@ -64,9 +64,11 @@ def create_app(test_config=None):
     @app.route('/close-orders', methods=['GET'])
     #@requires_auth('get:close-orders')
     def close_orders():
-        available_orders = Close.query.all()
-        current_trades = [orders.closing_trade()
-                          for orders in available_orders]
+        # Join Open and Close tables on foreign key open_id
+        available_orders = db.session.query(Open, Close).join(Close).all()
+        # List comprehension to combine open and close dictionaries
+        current_trades = [{**open.opening_trade(), **close.closing_trade()}
+                          for open, close in available_orders]
 
         return jsonify({
             'success': True,
