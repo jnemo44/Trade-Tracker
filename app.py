@@ -162,13 +162,13 @@ def create_app(test_config=None):
             # Add new model to the database
             new_trade.insert()
 
-            available_orders = Open.query.all()
-            current_trades = [orders.opening_trade()
-                              for orders in available_orders]
+            #available_orders = Open.query.all()
+            #current_trades = [orders.opening_trade()
+            #                 for orders in available_orders]
 
             return jsonify({
                 'success': True,
-                'current_trades': current_trades
+                #'current_trades': current_trades
             })
         except BaseException:
             # Report specific error
