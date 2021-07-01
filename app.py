@@ -138,12 +138,20 @@ def create_app(test_config=None):
         new_contracts = body.get('numContracts', None)
         new_price = body.get('openPrice', None)
         new_adjustment = body.get('adjustment', None)
+        new_adjustment_id = body.get('adjustmentID', None)
         new_closed = body.get('closed', None)
         new_spread = body.get('spread', None)
         new_open_notes = body.get('openNotes', None)
 
         if new_open_date is None:
             abort(400)
+
+        # This is the first adjustment, assign an ID = to original OpenID
+        if new_adjustment is True and new_adjustment_id is None:
+            # Retrieve OpenID (Only submitted with adjustment forms)
+            new_open_id = body.get('openID', None)
+            # Establish OpenID as AdjustmentID for tracking
+            new_adjustment_id = new_open_id
 
         try:
             new_trade = Open(
@@ -155,6 +163,7 @@ def create_app(test_config=None):
                 open_price=new_price,
                 spread=new_spread,
                 adjustment=new_adjustment,
+                adjustment_id=new_adjustment_id,
                 closed=new_closed,
                 open_notes=new_open_notes
             )

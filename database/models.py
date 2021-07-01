@@ -75,6 +75,7 @@ class Open(HelperFunctions):
     number_contracts = Column(Integer, nullable=False)
     open_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
+    adjustment_id = Column(Numeric, unique=True)
     closed = Column(Boolean, nullable=False)
     spread = Column(String(100))
     open_notes = Column(String(500))
@@ -98,6 +99,7 @@ class Open(HelperFunctions):
             'numContracts': self.number_contracts,
             'openPrice': str(self.open_price),
             'adjustment': self.adjustment,
+            'adjustmentID': self.adjustment_id,
             'closed': self.closed,
             'spread': self.spread,
             'openNotes': self.open_notes,
