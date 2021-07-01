@@ -98,8 +98,9 @@ class Open(HelperFunctions):
             'numContracts': self.number_contracts,
             'openPrice': str(self.open_price),
             'adjustment': self.adjustment,
+            'closed': self.closed,
             'spread': self.spread,
-            'openNotes': self.open_notes
+            'openNotes': self.open_notes,
         }
 
 
