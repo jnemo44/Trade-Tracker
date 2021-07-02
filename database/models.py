@@ -75,7 +75,7 @@ class Open(HelperFunctions):
     number_contracts = Column(Integer, nullable=False)
     open_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
-    adjustment_id = Column(Numeric, unique=True)
+    adjustment_id = Column(Integer)
     closed = Column(Boolean, nullable=False)
     spread = Column(String(100))
     open_notes = Column(String(500))
@@ -123,6 +123,7 @@ class Close(HelperFunctions):
     number_contracts = Column(Integer, nullable=False)
     close_price = Column(Numeric(precision=10, scale=2), nullable=False)
     adjustment = Column(Boolean, nullable=False)
+    adjustment_id = Column(Integer)
     close_notes = Column(String(400))
 
     def closing_trade(self):
@@ -134,5 +135,6 @@ class Close(HelperFunctions):
             'numContracts': self.number_contracts,
             'closePrice': str(self.close_price),
             'adjustment': self.adjustment,
+            'adjustmentID': self.adjustment_id,
             'closeNotes': self.close_notes
         }

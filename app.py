@@ -64,8 +64,10 @@ def create_app(test_config=None):
     @app.route('/close-orders', methods=['GET'])
     #@requires_auth('get:close-orders')
     def close_orders():
+        # Get non-adjusted close orders
+
         # Join Open and Close tables on foreign key open_id
-        available_orders = db.session.query(Open, Close).join(Close).all()
+        available_orders = db.session.query(Open, Close).filter(Close.adjustment == 'false').join(Close).all()
         # List comprehension to combine open and close dictionaries
         current_trades = [{**open.opening_trade(), **close.closing_trade()}
                           for open, close in available_orders]
@@ -194,7 +196,13 @@ def create_app(test_config=None):
         new_contracts = body.get('numContracts', None)
         new_price = body.get('closePrice', None)
         new_adjustment = body.get('adjustment', None)
+        new_adjustment_id = body.get('adjustmentID', None)
         new_notes = body.get('closeNotes', None)
+
+        # This is the first adjustment, assign an ID = to original OpenID
+        if new_adjustment is True and new_adjustment_id is None:
+            # Establish OpenID as AdjustmentID for tracking
+            new_adjustment_id = new_oid
 
         try:
             new_trade = Close(
@@ -204,18 +212,19 @@ def create_app(test_config=None):
                 number_contracts=new_contracts,
                 close_price=new_price,
                 adjustment=new_adjustment,
+                adjustment_id=new_adjustment_id,
                 close_notes=new_notes,
             )
 
             new_trade.insert()
 
-            available_orders = Close.query.all()
-            current_trades = [orders.closing_trade()
-                              for orders in available_orders]
+            #available_orders = Close.query.all()
+            #current_trades = [orders.closing_trade()
+            #                  for orders in available_orders]
 
             return jsonify({
                 'success': True,
-                'close_orders': current_trades
+                #'close_orders': current_trades
             })
         except BaseException:
             # Report specific error
@@ -234,6 +243,7 @@ def create_app(test_config=None):
         body = request.get_json()
         # Currently only allow updating the closed flag
         new_closed = body.get('closed', None)
+        new_adjustment_id = body.get('adjustmentID', None)
 
         # Bad Request
         if new_closed is None:
@@ -242,6 +252,12 @@ def create_app(test_config=None):
         try:
             # Push update to database
             selected_order.closed = new_closed
+            # Ignore empty ID
+            if new_adjustment_id is None:
+                pass
+            else: 
+                selected_order.adjustment_id = new_adjustment_id
+            
             selected_order.update()
 
             return jsonify({
