@@ -1,0 +1,4 @@
+export FLASK_APP=app.py
+export FLASK_ENV=development
+source /Users/jniemiec/Dev/Trade-Tracker/env/bin/activate
+flask run 

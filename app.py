@@ -4,7 +4,7 @@ import decimal
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from sqlalchemy.sql.expression import false
+from sqlalchemy.sql.expression import false, distinct
 from database.models import (
     setup_db,
     db_drop_and_create_all,
@@ -64,17 +64,38 @@ def create_app(test_config=None):
     @app.route('/close-orders', methods=['GET'])
     #@requires_auth('get:close-orders')
     def close_orders():
-        # Get non-adjusted close orders
+        # Need to combine adjustment orders into one unit
+        unique_id = db.session.query(distinct(Open.adjustment_id)).all()
+        # Extract just the id from the list of tuples and removing None if present
+        # unique_id_list = [i for i in [id[0] for id in unique_id] if i]
+        unique_id_list = list(filter(None, [id[0] for id in unique_id]))
+        print(unique_id_list)
+        # Get adjusted close orders
+        for id in unique_id_list:
+            # Do some query that returns the combined info of a series of adjustments
+            adjusted_orders= db.session.query(Open, Close).filter(Close.adjustment_id != None).join(Close).all()
+
+        for open, close in adjusted_orders:
+            print(open.adjustment_id)
+            print(close.adjustment_id)
+
+        #adjusted_trades = [{**open.opening_trade(), **close.closing_trade()}
+        #                  for open, close in adjusted_orders]
 
         # Join Open and Close tables on foreign key open_id
-        available_orders = db.session.query(Open, Close).filter(Close.adjustment == 'false').join(Close).all()
+        non_adjusted_orders = db.session.query(Open, Close).filter(Close.adjustment_id == None).join(Close).all()
+
         # List comprehension to combine open and close dictionaries
-        current_trades = [{**open.opening_trade(), **close.closing_trade()}
-                          for open, close in available_orders]
+        non_adjusted_trades = [{**open.opening_trade(), **close.closing_trade()}
+                          for open, close in non_adjusted_orders]
+
+        #print("Non Adjusted Trades",non_adjusted_trades)
+        print("Adjusted Trades", adjusted_orders)
 
         return jsonify({
             'success': True,
-            'close_list': current_trades
+            'close_list': non_adjusted_trades,
+            #'adjusted_list': adjusted_trades
         })
 
     @app.route('/order-stats', methods=['GET'])
