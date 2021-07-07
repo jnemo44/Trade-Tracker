@@ -70,17 +70,15 @@ def create_app(test_config=None):
         # unique_id_list = [i for i in [id[0] for id in unique_id] if i]
         unique_id_list = list(filter(None, [id[0] for id in unique_id]))
         print(unique_id_list)
+        adjusted_orders = []
+        adjusted_trades = []
         # Get adjusted close orders
-        for id in unique_id_list:
+        for idx, id in enumerate(unique_id_list):
             # Do some query that returns the combined info of a series of adjustments
-            adjusted_orders= db.session.query(Open, Close).filter(Close.adjustment_id != None).join(Close).all()
+            adjusted_orders.append(db.session.query(Open, Close).filter(Close.adjustment_id == id).join(Close).all())
+            adjusted_trades.append([{**open.opening_trade(), **close.closing_trade()}
+                          for open, close in adjusted_orders[idx]])
 
-        for open, close in adjusted_orders:
-            print(open.adjustment_id)
-            print(close.adjustment_id)
-
-        #adjusted_trades = [{**open.opening_trade(), **close.closing_trade()}
-        #                  for open, close in adjusted_orders]
 
         # Join Open and Close tables on foreign key open_id
         non_adjusted_orders = db.session.query(Open, Close).filter(Close.adjustment_id == None).join(Close).all()
@@ -89,13 +87,19 @@ def create_app(test_config=None):
         non_adjusted_trades = [{**open.opening_trade(), **close.closing_trade()}
                           for open, close in non_adjusted_orders]
 
-        #print("Non Adjusted Trades",non_adjusted_trades)
-        print("Adjusted Trades", adjusted_orders)
+        print("Non Adjusted Trades",non_adjusted_trades)
+        print("Adjusted Trades", adjusted_trades)
+        for i in adjusted_orders:
+            # Gets Ticker and # of adjustments made
+            print(i[0][0].ticker, len(i))
 
+        print(adjusted_orders[0][0].Open.open_price)
         return jsonify({
             'success': True,
             'close_list': non_adjusted_trades,
-            #'adjusted_list': adjusted_trades
+            'adjusted_list': adjusted_trades,
+            'trades_adjusted': len(adjusted_orders),
+            'adjustment_ids': unique_id_list,
         })
 
     @app.route('/order-stats', methods=['GET'])
