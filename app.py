@@ -89,17 +89,20 @@ def create_app(test_config=None):
 
         print("Non Adjusted Trades",non_adjusted_trades)
         print("Adjusted Trades", adjusted_trades)
+        adjustment_info = []
         for i in adjusted_orders:
             # Gets Ticker and # of adjustments made
-            print(i[0][0].ticker, len(i))
+            adjustment_info.append((i[0][0].ticker, len(i)))
 
-        print(adjusted_orders[0][0].Open.open_price)
+        print(adjustment_info)
+        #print(adjusted_orders[0][0].Open.open_price)
         return jsonify({
             'success': True,
-            'close_list': non_adjusted_trades,
+            'non_adjusted_list': non_adjusted_trades,
             'adjusted_list': adjusted_trades,
             'trades_adjusted': len(adjusted_orders),
             'adjustment_ids': unique_id_list,
+            'adjustment_info': adjustment_info
         })
 
     @app.route('/order-stats', methods=['GET'])
