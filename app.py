@@ -161,6 +161,7 @@ def create_app(test_config=None):
     #@requires_auth('post:open-orders')
     def new_open_order():
         body = request.get_json()
+        print(body)
         new_open_date = body.get('openDate', None)
         new_expiration_date = body.get('expirationDate', None)
         new_buy_sell = body.get('buyOrSell', None)
@@ -270,8 +271,17 @@ def create_app(test_config=None):
 
         body = request.get_json()
         # Currently only allow updating the closed flag
-        new_closed = body.get('closed', None)
+        new_open_date = body.get('openDate', None)
+        new_expiration_date = body.get('expirationDate', None)
+        new_buy_sell = body.get('buyOrSell', None)
+        new_ticker = body.get('ticker', None)
+        new_contracts = body.get('numContracts', None)
+        new_price = body.get('openPrice', None)
+        new_adjustment = body.get('adjustment', None)
         new_adjustment_id = body.get('adjustmentID', None)
+        new_closed = body.get('closed', None)
+        new_spread = body.get('spread', None)
+        new_open_notes = body.get('openNotes', None)
 
         # Bad Request
         if new_closed is None:
@@ -279,6 +289,10 @@ def create_app(test_config=None):
 
         try:
             # Push update to database
+            selected_order.open_date = new_open_date
+            selected_order.expiration_date = new_expiration_date
+            selected_order.buy_or_sell = new_buy_sell
+            selected_order.ticker = new_ticker
             selected_order.closed = new_closed
             # Ignore empty ID
             if new_adjustment_id is None:
