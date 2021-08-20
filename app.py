@@ -270,36 +270,50 @@ def create_app(test_config=None):
             abort(404)
 
         body = request.get_json()
-        # Currently only allow updating the closed flag
+        # We have a two types of PATCH operations...one for adjustments and one for edits
+
+        # Edit
         new_open_date = body.get('openDate', None)
         new_expiration_date = body.get('expirationDate', None)
         new_buy_sell = body.get('buyOrSell', None)
         new_ticker = body.get('ticker', None)
         new_contracts = body.get('numContracts', None)
         new_price = body.get('openPrice', None)
-        new_adjustment = body.get('adjustment', None)
-        new_adjustment_id = body.get('adjustmentID', None)
-        new_closed = body.get('closed', None)
         new_spread = body.get('spread', None)
         new_open_notes = body.get('openNotes', None)
+
+        # Adjustment
+        new_adjustment_id = body.get('adjustmentID', None) # Only used for adjustments to patch original trade adj id
+        new_closed = body.get('closed', None) # Used to decide if its an adjust or edit patch. Adjust = True
+        
+        #new_adjustment = body.get('adjustment', None) -- This param is not currently sent with patch
 
         # Bad Request
         if new_closed is None:
             abort(400)
 
         try:
-            # Push update to database
-            selected_order.open_date = new_open_date
-            selected_order.expiration_date = new_expiration_date
-            selected_order.buy_or_sell = new_buy_sell
-            selected_order.ticker = new_ticker
-            selected_order.closed = new_closed
-            # Ignore empty ID
-            if new_adjustment_id is None:
-                pass
-            else: 
-                selected_order.adjustment_id = new_adjustment_id
-            
+            # New_Closed will always be True for an adjustment patch so use it as the coniditional
+            if new_closed:
+                # Flag that determines if it's displayed on open trades list
+                selected_order.closed = new_closed
+                # Ignore empty ID
+                if new_adjustment_id is None:
+                    pass
+                else: 
+                    selected_order.adjustment_id = new_adjustment_id
+            # Else it's an order edit patch so update all editable fields
+            else:
+                # Push update to database
+                selected_order.open_date = new_open_date
+                selected_order.expiration_date = new_expiration_date
+                selected_order.buy_or_sell = new_buy_sell
+                selected_order.ticker = new_ticker
+                selected_order.number_contracts = new_contracts
+                selected_order.open_price = new_price
+                selected_order.spread = new_spread
+                selected_order.open_notes = new_open_notes
+                     
             selected_order.update()
 
             return jsonify({
