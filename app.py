@@ -173,6 +173,7 @@ def create_app(test_config=None):
         new_closed = body.get('closed', None)
         new_spread = body.get('spread', None)
         new_open_notes = body.get('openNotes', None)
+        new_trade_legs = body.get('tradeLegs', None)
 
         if new_open_date is None:
             abort(400)
@@ -196,7 +197,8 @@ def create_app(test_config=None):
                 adjustment=new_adjustment,
                 adjustment_id=new_adjustment_id,
                 closed=new_closed,
-                open_notes=new_open_notes
+                open_notes=new_open_notes,
+                trade_legs=new_trade_legs,
             )
 
             # Add new model to the database
@@ -281,6 +283,7 @@ def create_app(test_config=None):
         new_price = body.get('openPrice', None)
         new_spread = body.get('spread', None)
         new_open_notes = body.get('openNotes', None)
+        new_trade_legs = body.get('tradeLegs', None)
 
         # Adjustment
         new_adjustment_id = body.get('adjustmentID', None) # Only used for adjustments to patch original trade adj id
@@ -313,6 +316,7 @@ def create_app(test_config=None):
                 selected_order.open_price = new_price
                 selected_order.spread = new_spread
                 selected_order.open_notes = new_open_notes
+                selected_order.trade_legs = new_trade_legs
                      
             selected_order.update()
 

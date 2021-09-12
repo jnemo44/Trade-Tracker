@@ -8,7 +8,8 @@ from sqlalchemy import (
     Numeric,
     Boolean,
     String,
-    ForeignKey
+    ForeignKey,
+    PickleType,
 )
 from sqlalchemy.sql.sqltypes import BOOLEAN
 
@@ -79,6 +80,7 @@ class Open(HelperFunctions):
     closed = Column(Boolean, nullable=False)
     spread = Column(String(100))
     open_notes = Column(String(500))
+    trade_legs = Column(PickleType())
     # Relationship is one to many (An open order can have multiple close
     # orders)
     open_close = db.relationship(
@@ -103,6 +105,7 @@ class Open(HelperFunctions):
             'closed': self.closed,
             'spread': self.spread,
             'openNotes': self.open_notes,
+            'tradeLegs': self.trade_legs,
         }
 
 
@@ -136,5 +139,5 @@ class Close(HelperFunctions):
             'closePrice': str(self.close_price),
             'adjustment': self.adjustment,
             'adjustmentID': self.adjustment_id,
-            'closeNotes': self.close_notes
+            'closeNotes': self.close_notes,
         }
