@@ -108,6 +108,20 @@ class Open(HelperFunctions):
             'tradeLegs': self.trade_legs,
         }
 
+    def open_adjustment_list(unique_id_list):
+        closed_adjusted_trade_IDs = []
+        for idx, id in enumerate(unique_id_list):
+            trades = db.session.query(Close).filter(Close.adjustment_id == id).all()
+            for trade in trades:
+                # If False occurs with an adjustment_id it is CLOSED and should be displayed
+                if trade.adjustment == False:
+                    closed_adjusted_trade_IDs.append(trade.adjustment_id)
+        
+        open_adjusted_trade_IDs = [i for i in unique_id_list if i not in closed_adjusted_trade_IDs]
+        
+        return closed_adjusted_trade_IDs, open_adjusted_trade_IDs
+
+
 
 class Close(HelperFunctions):
     __tablename__ = 'close_orders'

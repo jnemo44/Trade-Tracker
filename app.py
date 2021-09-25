@@ -52,55 +52,59 @@ def create_app(test_config=None):
     @app.route('/open-orders', methods=['GET'])
     #@requires_auth('get:open-orders')
     def open_orders():
+        open_adjusted_trade_IDs = []
+        open_adjusted_orders = []
+        open_adjusted_trades = []
+
+        # Get all open orders (no open adjustments)
         available_orders = Open.query.filter(Open.closed == 'false').all()
         current_trades = [orders.opening_trade()
                           for orders in available_orders]
 
+        # Get all Adjustment ID's that exist
+        unique_id = db.session.query(distinct(Open.adjustment_id)).all()
+        # Extract just the id from the list of tuples and removing None if present
+        unique_id_list = list(filter(None, [id[0] for id in unique_id]))
+        # Split all adjustment ID's into open and closed
+        adjusted_trade_IDs = Open.open_adjustment_list(unique_id_list)
+        # Index 0 contains closed adjustments Index 1 contains open adjustments
+        open_adjusted_trade_IDs = adjusted_trade_IDs[1]
+
+        # Get adjusted close orders
+        for idx, id in enumerate(open_adjusted_trade_IDs):
+            # Do some query that returns the combined info of a series of adjustments
+            open_adjusted_orders.append(db.session.query(Open, Close).filter(Close.adjustment_id == id).join(Close).all())
+            open_adjusted_trades.append([{**open.opening_trade(), **close.closing_trade()}
+                          for open, close in open_adjusted_orders[idx]])
+
         return jsonify({
             'success': True,
-            'open_list': current_trades
+            'open_list': current_trades,
+            'open_adjusted_trades': open_adjusted_trades
         })
 
     @app.route('/close-orders', methods=['GET'])
     #@requires_auth('get:close-orders')
     def close_orders():
+        closed_adjusted_orders = []
+        closed_adjusted_trades = []
+
         # Get all Adjustment ID's that exist
         unique_id = db.session.query(distinct(Open.adjustment_id)).all()
         # Extract just the id from the list of tuples and removing None if present
         unique_id_list = list(filter(None, [id[0] for id in unique_id]))
 
-        open_adjusted_trade_IDs = []
-        closed_adjusted_trade_IDs = []
-        # Search all adjusted CLOSE trades to seperate open vs closed adjustments
-        for idx, id in enumerate(unique_id_list):
-            trades = db.session.query(Close).filter(Close.adjustment_id == id).all()
-            for trade in trades:
-                # If False occurs with an adjustment_id it is CLOSED and should be displayed
-                if trade.adjustment == False:
-                    closed_adjusted_trade_IDs.append(trade.adjustment_id)
-        # Return any trade adjustment ID's that are NOT closed
-        open_adjusted_trade_IDs = [i for i in unique_id_list if i not in closed_adjusted_trade_IDs]  
-        print(open_adjusted_trade_IDs)
-        print(closed_adjusted_trade_IDs)
-        closed_adjusted_orders = []
-        closed_adjusted_trades = []
+        # Split all adjustment ID's into open and closed
+        adjusted_trade_IDs = Open.open_adjustment_list(unique_id_list)
+        # Index 0 contains closed adjustments Index 1 contains open adjustments
+        closed_adjusted_trade_IDs = adjusted_trade_IDs[0]
+        
         # Get adjusted close orders
         for idx, id in enumerate(closed_adjusted_trade_IDs):
             # Do some query that returns the combined info of a series of adjustments
             closed_adjusted_orders.append(db.session.query(Open, Close).filter(Close.adjustment_id == id).join(Close).all())
             closed_adjusted_trades.append([{**open.opening_trade(), **close.closing_trade()}
                           for open, close in closed_adjusted_orders[idx]])
-
-        open_adjusted_orders = []
-        open_adjusted_trades = []
-        # Get adjusted close orders
-        for idx, id in enumerate(closed_adjusted_trade_IDs):
-            # Do some query that returns the combined info of a series of adjustments
-            open_adjusted_orders.append(db.session.query(Open, Close).filter(Close.adjustment_id == id).join(Close).all())
-            open_adjusted_trades.append([{**open.opening_trade(), **close.closing_trade()}
-                          for open, close in open_adjusted_orders[idx]])
-
-        
 
         # Join Open and Close tables on foreign key open_id
         non_adjusted_orders = db.session.query(Open, Close).filter(Close.adjustment_id == None).join(Close).all()
@@ -110,17 +114,15 @@ def create_app(test_config=None):
                           for open, close in non_adjusted_orders]
 
         adjustment_info = []
-        for i in adjusted_orders:
+        for i in closed_adjusted_orders:
             # Gets Ticker and # of adjustments made
             adjustment_info.append((i[0][0].ticker, len(i)))
-        print("Adjusted",adjusted_trades)
-        print("Non Adjusted",non_adjusted_trades)
 
         return jsonify({
             'success': True,
             'non_adjusted_list': non_adjusted_trades,
-            'adjusted_list': adjusted_trades,
-            'trades_adjusted': len(adjusted_orders),
+            'closed_adjusted_list': closed_adjusted_trades,
+            'trades_adjusted': len(closed_adjusted_orders),
             'adjustment_ids': unique_id_list,
             'adjustment_info': adjustment_info
         })
