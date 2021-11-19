@@ -54,12 +54,17 @@ def create_app(test_config=None):
     def open_orders():
         open_adjusted_trade_IDs = []
         open_adjusted_orders = []
-        open_adjusted_trades = []
+        trade_history = []
 
         # Get all open orders (no open adjustments)
         available_orders = Open.query.filter(Open.closed == 'false').all()
-        current_trades = [orders.opening_trade()
+        open_trades = [orders.opening_trade()
                           for orders in available_orders]
+        
+        # non_adjusted_open = Open.query.filter(Open.closed == 'false').filter(Open.adjustment == 'false').all()
+        # non_adjusted_trades = [orders.opening_trade()
+        #                   for orders in non_adjusted_open]
+        # print('NON ADJUSTED: ', non_adjusted_trades)
 
         # Get all Adjustment ID's that exist
         unique_id = db.session.query(distinct(Open.adjustment_id)).all()
@@ -74,13 +79,15 @@ def create_app(test_config=None):
         for idx, id in enumerate(open_adjusted_trade_IDs):
             # Do some query that returns the combined info of a series of adjustments
             open_adjusted_orders.append(db.session.query(Open, Close).filter(Close.adjustment_id == id).join(Close).all())
-            open_adjusted_trades.append([{**open.opening_trade(), **close.closing_trade()}
+            trade_history.append([{**open.opening_trade(), **close.closing_trade()}
                           for open, close in open_adjusted_orders[idx]])
 
         return jsonify({
             'success': True,
-            'open_list': current_trades,
-            'open_adjusted_trades': open_adjusted_trades
+            'open_list': open_trades,
+            'trade_history': trade_history,
+            'adjusted_trade_IDs': adjusted_trade_IDs,
+            # 'non_adjusted_trades': non_adjusted_trades
         })
 
     @app.route('/close-orders', methods=['GET'])
@@ -400,6 +407,53 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'deleted_id': order_id
+            })
+
+        except BaseException:
+            # Report specific error
+            print(sys.exc_info())
+            abort(422)
+
+    @app.route('/close-orders', methods=['DELETE'])
+    #@requires_auth('delete:open-orders')
+    def delete_close_order():
+        adjustment_id  = request.args.get('adjustmentID', None)
+        order_id  = request.args.get('id', None)
+        adjusted_orders = []
+        orders = []
+
+        # Deleting a close order will delete all matching open orders
+        # If no adjustments it's a solo close order with one matching open order
+        if adjustment_id == 'null':
+            # Find Trades based on adjustmentID
+            orders.append(Close.query.filter(Close.open_id == int(order_id)).one_or_none())
+            orders.append(Open.query.filter(Open.id == int(order_id)).one_or_none())
+        else:
+            # Find group of trades with same adjustmentID
+            adjusted_orders = Close.query.filter(Close.adjustment_id == int(adjustment_id)).all()
+            # Get ID's for corresponding trades that need to be deleted in open_trades table
+            for order in adjusted_orders:
+               #Add Matching Open Trade
+               orders.append(Open.query.filter(Open.id == order.open_id).one_or_none())
+               #Add Close Trade
+               orders.append(order)
+    
+        # Nothing to delete
+        if orders is None:
+            abort(404)
+
+        try:
+            # Delete Open and Close Trades
+            for order in orders:
+                db.session.delete(order)
+            
+            # Commit the session
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'deleted_order_id': order_id,
+                'deleted_adjustment_id': adjustment_id
             })
 
         except BaseException:
